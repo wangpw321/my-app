@@ -27,14 +27,14 @@ declare var $: any;
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
-  providers: [CurrencyPipe], // Provide CurrencyPipe
+  providers: [CurrencyPipe],
 })
 export class HomeComponent implements OnInit {
   courses: any[] = [];
   modalTitle = '';
   CourseId = 0;
-  searchText: string = ''; // Add this property to bind to the search input
-  p: number = 1; // Add this property to track the current page
+  searchText: string = '';
+  p: number = 1;
   courseForm: FormGroup;
 
   currencies: string[] = [
@@ -117,7 +117,7 @@ export class HomeComponent implements OnInit {
 
   refreshList() {
     this.http.get<any>(environment.apiUrl + 'course').subscribe((data) => {
-      this.courses = Array.isArray(data) ? data : []; // Ensure data is an array
+      this.courses = Array.isArray(data) ? data : [];
       this.initializeTooltips();
     });
   }
@@ -237,9 +237,9 @@ export class HomeComponent implements OnInit {
   }
 
   hideModal() {
-    $('#exampleModal').modal('hide'); // Hide the modal
-    $('body').removeClass('modal-open'); // Remove the modal-open class from the body
-    $('.modal-backdrop').remove(); // Remove the modal backdrop
+    $('#exampleModal').modal('hide');
+    $('body').removeClass('modal-open');
+    $('.modal-backdrop').remove();
   }
 
   onSubmit() {
