@@ -1,0 +1,410 @@
+<div class="d-flex mb-3">
+  <button
+    type="button"
+    class="btn btn-primary"
+    style="margin-left: 80px"
+    data-bs-toggle="modal"
+    data-bs-target="#exampleModal"
+    (click)="addClick()"
+  >
+    Add new course
+  </button>
+
+  <div class="input-group ms-2" style="max-width: 300px">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Search courses"
+      [(ngModel)]="searchText"
+    />
+    <span class="input-group-text">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="16"
+        height="16"
+        fill="currentColor"
+        class="bi bi-search"
+        viewBox="0 0 16 16"
+      >
+        <path
+          d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.415l-3.85-3.85a1.007 1.007 0 0 0-.115-.099zm-5.457 0a5.5 5.5 0 1 1 0-11 5.5 5.5 0 0 1 0 11z"
+        />
+      </svg>
+    </span>
+  </div>
+</div>
+
+<div class="table-responsive px-4">
+  <table class="table table-striped table-sm">
+    <thead>
+      <tr>
+        <th>Course Name</th>
+        <th>Location</th>
+        <th>Start Date</th>
+        <th>Length</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        *ngFor="
+          let course of filteredCourses()
+            | paginate : { itemsPerPage: 10, currentPage: p }
+        "
+        [attr.title]="course.CourseDescription"
+        data-bs-toggle="tooltip"
+      >
+        <td>
+          <button
+            type="button"
+            class="btn btn-light btn-sm mx-1"
+            data-bs-toggle="modal"
+            data-bs-target="#exampleModal"
+            (click)="editClick(course)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              class="bi bi-pencil-square"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"
+              />
+              <path
+                fill-rule="evenodd"
+                d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"
+              />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="btn btn-light btn-sm mx-1"
+            (click)="deleteClick(course.CourseId)"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="10"
+              height="10"
+              fill="currentColor"
+              class="bi bi-x-lg"
+              viewBox="0 0 16 16"
+            >
+              <path
+                d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"
+              />
+            </svg>
+          </button>
+          {{ course.CourseName }}
+        </td>
+        <td>
+          {{ course.Country }}, {{ course.City }}, {{ course.University }}
+        </td>
+        <td>{{ course.StartDate }}</td>
+        <td>{{ getLength(course.StartDate, course.EndDate) }}</td>
+        <td>{{ course.Price | currency : course.Currency }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="d-flex justify-content-center">
+  <pagination-controls (pageChange)="p = $event"></pagination-controls>
+</div>
+
+<div
+  class="modal fade"
+  id="exampleModal"
+  tabindex="-1"
+  aria-labelledby="exampleModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">{{ modalTitle }}</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="courseForm" (ngSubmit)="onSubmit()">
+          <div class="mb-3 row">
+            <label for="CourseName" class="col-sm-3 col-form-label"
+              >Course Name:</label
+            >
+            <div class="col-sm-9">
+              <input
+                type="text"
+                class="form-control"
+                id="CourseName"
+                formControlName="CourseName"
+              />
+              <div
+                *ngIf="
+                  courseForm.controls['CourseName'].errors &&
+                  (courseForm.controls['CourseName'].dirty ||
+                    courseForm.controls['CourseName'].touched)
+                "
+                class="text-danger"
+              >
+                <div
+                  *ngIf="courseForm.controls['CourseName'].errors['required']"
+                >
+                  Course Name is required.
+                </div>
+                <div
+                  *ngIf="courseForm.controls['CourseName'].errors['maxlength']"
+                >
+                  Course Name cannot exceed 100 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="University" class="col-sm-3 col-form-label"
+              >University:</label
+            >
+            <div class="col-sm-9">
+              <input
+                type="text"
+                class="form-control"
+                id="University"
+                formControlName="University"
+              />
+              <div
+                *ngIf="
+                  courseForm.controls['University'].errors &&
+                  (courseForm.controls['University'].dirty ||
+                    courseForm.controls['University'].touched)
+                "
+                class="text-danger"
+              >
+                <div
+                  *ngIf="courseForm.controls['University'].errors['required']"
+                >
+                  University is required.
+                </div>
+                <div
+                  *ngIf="courseForm.controls['University'].errors['maxlength']"
+                >
+                  University cannot exceed 50 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="Country" class="col-sm-3 col-form-label"
+              >Country:</label
+            >
+            <div class="col-sm-9">
+              <input
+                type="text"
+                class="form-control"
+                id="Country"
+                formControlName="Country"
+              />
+              <div
+                *ngIf="
+                  courseForm.controls['Country'].errors &&
+                  (courseForm.controls['Country'].dirty ||
+                    courseForm.controls['Country'].touched)
+                "
+                class="text-danger"
+              >
+                <div *ngIf="courseForm.controls['Country'].errors['required']">
+                  Country is required.
+                </div>
+                <div *ngIf="courseForm.controls['Country'].errors['maxlength']">
+                  Country cannot exceed 50 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="City" class="col-sm-3 col-form-label">City:</label>
+            <div class="col-sm-9">
+              <input
+                type="text"
+                class="form-control"
+                id="City"
+                formControlName="City"
+              />
+              <div
+                *ngIf="
+                  courseForm.controls['City'].errors &&
+                  (courseForm.controls['City'].dirty ||
+                    courseForm.controls['City'].touched)
+                "
+                class="text-danger"
+              >
+                <div *ngIf="courseForm.controls['City'].errors['required']">
+                  City is required.
+                </div>
+                <div *ngIf="courseForm.controls['City'].errors['maxlength']">
+                  City cannot exceed 50 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="Currency" class="col-sm-3 col-form-label"
+              >Currency:</label
+            >
+            <div class="col-sm-9">
+              <select
+                class="form-control"
+                id="Currency"
+                formControlName="Currency"
+              >
+                <option *ngFor="let currency of currencies" [value]="currency">
+                  {{ currency }}
+                </option>
+              </select>
+              <div
+                *ngIf="
+                  courseForm.controls['Currency'].errors &&
+                  (courseForm.controls['Currency'].dirty ||
+                    courseForm.controls['Currency'].touched)
+                "
+                class="text-danger"
+              >
+                <div *ngIf="courseForm.controls['Currency'].errors['required']">
+                  Currency is required.
+                </div>
+                <div
+                  *ngIf="courseForm.controls['Currency'].errors['maxlength']"
+                >
+                  Currency cannot exceed 10 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="Price" class="col-sm-3 col-form-label">Price:</label>
+            <div class="col-sm-9">
+              <input
+                type="text"
+                class="form-control"
+                id="Price"
+                formControlName="Price"
+              />
+              <div
+                *ngIf="
+                  courseForm.controls['Price'].errors &&
+                  (courseForm.controls['Price'].dirty ||
+                    courseForm.controls['Price'].touched)
+                "
+                class="text-danger"
+              >
+                <div *ngIf="courseForm.controls['Price'].errors['required']">
+                  Price is required.
+                </div>
+                <div *ngIf="courseForm.controls['Price'].errors['pattern']">
+                  Price must be a valid number.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="StartDate" class="col-sm-3 col-form-label"
+              >Start Date:</label
+            >
+            <div class="col-sm-9">
+              <input
+                type="date"
+                class="form-control"
+                id="StartDate"
+                formControlName="StartDate"
+              />
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="EndDate" class="col-sm-3 col-form-label"
+              >End Date:</label
+            >
+            <div class="col-sm-9">
+              <input
+                type="date"
+                class="form-control"
+                id="EndDate"
+                formControlName="EndDate"
+              />
+              <div
+                *ngIf="
+                  courseForm.controls['EndDate'].errors &&
+                  (courseForm.controls['EndDate'].dirty ||
+                    courseForm.controls['EndDate'].touched)
+                "
+                class="text-danger"
+              >
+                <div *ngIf="courseForm.controls['EndDate'].errors['dateOrder']">
+                  End Date cannot be earlier than Start Date.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3 row">
+            <label for="CourseDescription" class="col-sm-3 col-form-label"
+              >Course Description:</label
+            >
+            <div class="col-sm-9">
+              <textarea
+                class="form-control"
+                id="CourseDescription"
+                formControlName="CourseDescription"
+                rows="3"
+              ></textarea>
+              <div
+                *ngIf="
+                  courseForm.controls['CourseDescription'].errors &&
+                  (courseForm.controls['CourseDescription'].dirty ||
+                    courseForm.controls['CourseDescription'].touched)
+                "
+                class="text-danger"
+              >
+                <div
+                  *ngIf="
+                    courseForm.controls['CourseDescription'].errors['required']
+                  "
+                >
+                  Course Description is required.
+                </div>
+                <div
+                  *ngIf="
+                    courseForm.controls['CourseDescription'].errors['maxlength']
+                  "
+                >
+                  Course Description cannot exceed 50 characters.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="submit"
+              [disabled]="courseForm.invalid"
+              *ngIf="CourseId == 0"
+              class="btn btn-primary"
+            >
+              Create
+            </button>
+            <button
+              type="submit"
+              [disabled]="courseForm.invalid"
+              *ngIf="CourseId != 0"
+              class="btn btn-primary"
+            >
+              Edit
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
