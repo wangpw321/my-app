@@ -124,7 +124,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">{{ modalTitle }}</h5>
+        <h2 class="modal-title" id="exampleModalLabel">{{ modalTitle }}</h2>
         <button
           type="button"
           class="btn-close"
@@ -255,15 +255,23 @@
           <div class="mb-3 row">
             <label for="Currency" class="col-sm-3 col-form-label">Price:</label>
             <div class="col-sm-3">
-              <select
-                class="form-control"
-                id="Currency"
-                formControlName="Currency"
-              >
-                <option *ngFor="let currency of currencies" [value]="currency">
-                  {{ currency }}
-                </option>
-              </select>
+              <div class="custom-select-wrapper">
+                <select
+                  class="form-control custom-select"
+                  id="Currency"
+                  formControlName="Currency"
+                >
+                  <option value="" disabled selected>Select Currency</option>
+                  <option
+                    *ngFor="let currency of currencies"
+                    [value]="currency"
+                  >
+                    {{ currency }}
+                  </option>
+                </select>
+                <span class="custom-select-icon"></span>
+              </div>
+
               <div
                 *ngIf="
                   courseForm.controls['Currency'].errors &&
